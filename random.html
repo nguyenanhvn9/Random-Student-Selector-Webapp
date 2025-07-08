@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn Sinh Viên Ngẫu Nhiên - Giao diện Ghibli 4.0</title>
+    <!-- Thêm các font chữ Ghibli-inspired từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        /* General Styling - Ghibli Inspired 3.0 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: url("Studio-Ghibli.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #5a524c;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            /* 2. Tăng kích thước vùng chứa */
+            max-width: 1400px;
+            background: rgba(253, 250, 245, 0.92); /* Tăng độ trong suốt nhẹ */
+            backdrop-filter: blur(5px);
+            padding: 25px 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+
+        }
+
+        h1, h2 {
+            color: #587d71; /* Màu xanh lá sâu, trầm */
+            text-align: center;
+            font-family: 'Gaegu', cursive;
+        }
+        
+        h1 { margin-bottom: 30px; font-size: 3.5em; text-shadow: 1px 1px 2px #fff; }
+        h2 { margin-bottom: 20px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; font-size: 2.2em; }
+
+        p { color: #5f6368; font-size: 14px; text-align: center; margin-bottom: 20px; }
+
+        /* --- Part 1: Input Section --- */
+        #part-1 { text-align: center; }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dcd1c0;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            resize: vertical;
+            background-color: #fffaf0;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #8db596;
+            box-shadow: 0 0 0 3px rgba(141, 181, 150, 0.3);
+        }
+        
+        /* --- Part 2: Main App --- */
+        #part-2 { display: none; text-align: center; }
+        
+        /* Buttons */
+        button {
+            display: inline-block;
+            width: auto;
+            min-width: 200px;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        #load-btn { background: #8db596; }
+        #random-btn { padding: 15px; font-size: 22px; background: #f5a65b; margin-bottom: 20px; }
+        #back-btn { background-color: #a1887f; font-size: 14px; min-width: 150px; padding: 8px 20px; margin-top: 20px; }
+        
+        button:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+        button:disabled { background: #ccc !important; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        /* --- Student Notes Grid --- */
+        #student-notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 25px;
+            padding: 25px;
+            margin-top: 20px;
+            /* 2. Tăng chiều cao vùng chứa danh sách */
+            max-height: 60vh; /* 60% chiều cao màn hình */
+            overflow-y: auto;
+            /* Thêm thuộc tính để cuộn mượt mà */
+            scroll-behavior: smooth;
+        }
+
+        .student-note {
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            background-color: #fffaf0;
+            border: 1px solid #e0d8cd;
+            padding: 25px 15px 15px 15px;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 20px;
+            text-align: center;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 95% 100%, 0% 100%);
+        }
+        
+        .student-note::before, .student-note::after {
+            content: '';
+            position: absolute;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            transition: transform 0.3s ease;
+        }
+        
+        .student-note::before { width: 40px; height: 40px; top: -10px; left: -10px; }
+        .student-note::after { width: 30px; height: 30px; bottom: -5px; right: -5px; }
+
+        .note-style-1::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a5d6a7'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E"); }
+        .note-style-1::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef9a9a'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E"); }
+        .note-style-2::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2381d4fa'%3E%3Cpath d='M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12s4.48 10 10 10 10-4.48 10-10zm-10 8c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/%3E%3C/svg%3E"); }
+        .note-style-2::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffe082'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z'/%3E%3C/svg%3E"); }
+        .note-style-3::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ce93d8'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E"); }
+        .note-style-3::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23bcaaa4'%3E%3Cpath d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E"); }
+
+        /* --- Animation Highlight Classes --- */
+        .student-note.highlight {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px 8px rgba(245, 166, 91, 0.8);
+            z-index: 10;
+        }
+
+        /* --- Modal for Winner --- */
+        #winner-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        #winner-modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background-color: #fffaf0;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 5px solid #e8e0d4;
+            animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-congrats {
+            font-family: 'Gaegu', cursive;
+            font-size: 2em;
+            color: #587d71;
+        }
+        .modal-winner-name {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 3.5em;
+            color: #f5a65b;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2em;
+            color: #aaa;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .modal-close-btn:hover {
+            transform: scale(1.2);
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- PART 1: INPUT VIEW -->
+        <div id="part-1">
+            <h1>Chọn Sinh Viên Ngẫu Nhiên</h1>
+            <h2>Nạp danh sách lớp</h2>
+            <p>Dán danh sách sinh viên vào ô bên dưới. Mỗi sinh viên một dòng.</p>
+            <textarea id="student-input" rows="10" placeholder="2012345 - Nguyễn Văn A&#10;2012346 - Trần Thị B&#10;..."></textarea>
+            <button id="load-btn">Bắt đầu</button>
+        </div>
+
+        <!-- PART 2: MAIN APPLICATION VIEW -->
+        <div id="part-2">
+            <h2>Danh sách lớp (<span id="student-count">0</span>)</h2>
+            <div id="student-notes-grid">
+                <!-- Các notes sinh viên sẽ được hiển thị ở đây -->
+            </div>
+            <button id="random-btn" disabled>✨ QUAY SỐ ✨</button>
+            <button id="back-btn">Nhập lại danh sách</button>
+        </div>
+    </div>
+    
+    <!-- Modal để hiển thị người chiến thắng -->
+    <div id="winner-modal">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <div class="modal-congrats">🎉 Chúc mừng sinh viên may mắn! 🎉</div>
+            <div id="modal-winner-name" class="modal-winner-name"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DOM Elements ---
+            const part1 = document.getElementById('part-1');
+            const part2 = document.getElementById('part-2');
+            const studentInput = document.getElementById('student-input');
+            const loadBtn = document.getElementById('load-btn');
+            const randomBtn = document.getElementById('random-btn');
+            const backBtn = document.getElementById('back-btn');
+            const studentNotesGrid = document.getElementById('student-notes-grid');
+            const studentCountSpan = document.getElementById('student-count');
+            const winnerModal = document.getElementById('winner-modal');
+            const modalWinnerName = document.getElementById('modal-winner-name');
+            const modalCloseBtn = document.querySelector('.modal-close-btn');
+            
+            // --- Global State ---
+            let students = [];
+            let animationInterval;
+            const noteStyles = ['note-style-1', 'note-style-2', 'note-style-3'];
+            const highlightColors = ['#ffecb3', '#dcedc8', '#c5cae9', '#ffcdd2', '#e1bee7'];
+
+            // --- Event Listeners ---
+            loadBtn.addEventListener('click', handleLoadStudents);
+            randomBtn.addEventListener('click', handleRandomize);
+            backBtn.addEventListener('click', handleGoBack);
+            modalCloseBtn.addEventListener('click', () => winnerModal.classList.remove('show'));
+            winnerModal.addEventListener('click', (e) => {
+                if (e.target === winnerModal) {
+                    winnerModal.classList.remove('show');
+                }
+            });
+
+            // --- Event Handlers ---
+            function handleLoadStudents() {
+                // 1. Chuyển sang chế độ toàn màn hình khi bắt đầu
+                openFullscreen();
+
+                const inputText = studentInput.value;
+                students = inputText.split('\n').filter(line => line.trim() !== '');
+
+                if (students.length === 0) {
+                    alert("Vui lòng nhập danh sách sinh viên!");
+                    return;
+                }
+                
+                updateStudentNotesUI();
+                
+                part1.style.display = 'none';
+                part2.style.display = 'block';
+            }
+
+            function handleRandomize() {
+                if (students.length < 2) {
+                    alert("Cần ít nhất 2 sinh viên để quay số!");
+                    return;
+                }
+                startHighlightEffect();
+            }
+
+            function handleGoBack() {
+                part2.style.display = 'none';
+                part1.style.display = 'block';
+                studentInput.value = students.join('\n');
+            }
+
+            // --- UI Update Functions ---
+            function updateStudentNotesUI() {
+                studentNotesGrid.innerHTML = ''; 
+
+                if (students.length > 0) {
+                    students.forEach((student, index) => {
+                        const note = document.createElement('div');
+                        note.className = 'student-note';
+                        
+                        const styleClass = noteStyles[index % noteStyles.length];
+                        note.classList.add(styleClass);
+                        
+                        note.textContent = student;
+                        studentNotesGrid.appendChild(note);
+                    });
+                    randomBtn.disabled = false;
+                } else {
+                    randomBtn.disabled = true;
+                }
+                studentCountSpan.textContent = students.length;
+            }
+            
+            // --- Fullscreen Function ---
+            function openFullscreen() {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.mozRequestFullScreen) { /* Firefox */
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                    elem.msRequestFullscreen();
+                }
+            }
+
+            // --- Animation Function ---
+            function startHighlightEffect() {
+                randomBtn.disabled = true;
+                backBtn.disabled = true;
+
+                const allNotes = document.querySelectorAll('.student-note');
+                const intervalTime = 150; 
+                let highlightIndex = 0;
+                let lastHighlightedNode = null;
+                let originalBgColor = '';
+
+                const finalIndex = Math.floor(Math.random() * students.length);
+                const winnerName = students[finalIndex];
+                const duration = (allNotes.length * intervalTime) + (finalIndex * intervalTime);
+
+                animationInterval = setInterval(() => {
+                    if (lastHighlightedNode) {
+                        lastHighlightedNode.classList.remove('highlight');
+                        lastHighlightedNode.style.backgroundColor = originalBgColor;
+                    }
+                    
+                    const currentNode = allNotes[highlightIndex];
+                    originalBgColor = window.getComputedStyle(currentNode).backgroundColor; 
+
+                    currentNode.classList.add('highlight');
+                    currentNode.style.backgroundColor = highlightColors[highlightIndex % highlightColors.length];
+                    
+                    // Thêm chức năng tự động cuộn
+                    currentNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    lastHighlightedNode = currentNode;
+                    highlightIndex = (highlightIndex + 1) % allNotes.length;
+                }, intervalTime);
+
+                setTimeout(() => {
+                    clearInterval(animationInterval);
+                    
+                    if (lastHighlightedNode) {
+                        lastHighlightedNode.classList.remove('highlight');
+                        lastHighlightedNode.style.backgroundColor = originalBgColor;
+                    }
+                    
+                    modalWinnerName.textContent = winnerName;
+                    winnerModal.classList.add('show');
+
+                    const winnerNode = allNotes[finalIndex];
+                    winnerNode.classList.add('highlight');
+
+                    randomBtn.disabled = false;
+                    backBtn.disabled = false;
+                }, duration);
+            }
+        });
+    </script>
+</body>
+</html>
